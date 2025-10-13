@@ -18,3 +18,17 @@ services:
 #    volumes:
 #      - ./mysql/init:/docker-entrypoint-initdb.d
 #      - ./mysql/data:/var/lib/mysql
+
+
+  redis:
+    image: redis:7.0-alpine # 가볍고 안정적인 Redis 7.0 버전 사용
+    container_name: redis7
+    ports:
+      - "6379:6379" # host:redis (Spring Boot 기본 포트)
+    environment:
+      TZ: Asia/Seoul
+    # Redis는 영속성이 중요하지 않으면 volume 설정을 생략하거나,
+    # 데이터가 중요할 경우 아래 주석 해제하여 사용
+    #    volumes:
+    #      - ./redis/data:/data
+    command: redis-server --appendonly yes # AOF 설정을 통해 데이터 보존
