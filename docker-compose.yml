@@ -1,0 +1,34 @@
+version: "3.8"
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql8
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_0900_ai_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: coupon
+      MYSQL_USER: coupon
+      MYSQL_PASSWORD: coupon1234
+      TZ: Asia/Seoul
+    ports:
+      - "3307:3306" # host:mysql
+#    volumes:
+#      - ./mysql/init:/docker-entrypoint-initdb.d
+#      - ./mysql/data:/var/lib/mysql
+
+
+  redis:
+    image: redis:7.0-alpine # 가볍고 안정적인 Redis 7.0 버전 사용
+    container_name: redis7
+    ports:
+      - "6379:6379" # host:redis (Spring Boot 기본 포트)
+    environment:
+      TZ: Asia/Seoul
+    # Redis는 영속성이 중요하지 않으면 volume 설정을 생략하거나,
+    # 데이터가 중요할 경우 아래 주석 해제하여 사용
+    #    volumes:
+    #      - ./redis/data:/data
+    command: redis-server --appendonly yes # AOF 설정을 통해 데이터 보존
