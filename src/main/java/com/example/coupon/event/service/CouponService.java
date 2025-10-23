@@ -82,7 +82,7 @@ public class CouponService {
         return issuedCouponRepository.save(issuedCoupon);
     }
 
-    // RDBMS 트랜잭션 관리
+
     @Transactional
     public IssuedCoupon issueCoupon(Long couponId, Long userId) {
 
@@ -97,7 +97,6 @@ public class CouponService {
         }
 
         // --- 2. Redis 검증 통과 후, RDBMS 최종 발급 기록 ---
-
         // 락이 없는 일반 조회 (Read Only)
         // 비관적 락 제거: Redis가 순서를 제어하므로 DB 락은 불필요하며 성능 저하만 야기합니다.
         Coupon coupon = couponRepository.findById(couponId)
@@ -105,10 +104,6 @@ public class CouponService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
-
-        // ⚠️ (Optional) 마지막 안전 장치: 재고 확인 및 중복 검사는 Redis에서 이미 처리했지만,
-        // DB 정합성이 꼭 필요하다면 여기서 한번 더 검사합니다.
-        // 단, Redis 설계가 정확하다면 이 검사는 거의 항상 통과해야 합니다.
 
         // 1. DB 재고 증가 (최종 발급 수량 기록)
         // Redis ZADD 성공 후, 해당 요청이 실제 DB에 기록되어야 할 N번째 요청임을 의미합니다.
@@ -121,7 +116,6 @@ public class CouponService {
         // 3. Redis 최종 발급 기록 (다음 요청의 중복 검사용)
         // DB 트랜잭션이 성공적으로 커밋될 경우에만 Redis Set에 기록되어 영구적인 중복 발급을 방지합니다.
         redisService.recordIssuedUser(couponId, userId);
-
         return savedCoupon;
     }
 }

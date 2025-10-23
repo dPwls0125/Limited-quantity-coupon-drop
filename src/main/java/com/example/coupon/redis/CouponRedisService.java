@@ -49,7 +49,6 @@ public class CouponRedisService {
                 return true; // 선착순 등록 성공
             }
         }
-
         return false; // 선착순 마감 또는 등록 실패
     }
 
